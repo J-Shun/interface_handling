@@ -5,6 +5,7 @@ const url = "https://livejs-api.hexschool.io/api/livejs/v1/customer/shun11023/";
 const productList = document.querySelector(".productWrap");
 const clearAllBtn = document.querySelector(".discardAllBtn");
 const sendBtn = document.querySelector(".orderInfo-btn");
+const productSelect = document.querySelector(".productSelect");
 
 // display
 const loading = document.querySelector(".loading");
@@ -25,7 +26,7 @@ function init() {
     .get(url + `products`)
     .then((res) => {
       itemList = res.data.products;
-      renderItem();
+      renderItem(itemList);
       initCart();
     })
     .catch((err) => {
@@ -45,9 +46,9 @@ function initCart() {
     });
 }
 
-function renderItem() {
+function renderItem(list) {
   let allContent = "";
-  itemList.forEach((item) => {
+  list.forEach((item) => {
     allContent += `
     <li class="productCard">
       <h4 class="productType">新品</h4>
@@ -263,10 +264,27 @@ function sendOrder(e) {
   }
 }
 
+function selectCategory(e) {
+  const category = e.target.value;
+  if (category === "全部") {
+    renderItem(itemList);
+  } else if (category === "床架") {
+    const specificList = itemList.filter((item) => item.category === "床架");
+    renderItem(specificList);
+  } else if (category === "收納") {
+    const specificList = itemList.filter((item) => item.category === "收納");
+    renderItem(specificList);
+  } else {
+    const specificList = itemList.filter((item) => item.category === "窗簾");
+    renderItem(specificList);
+  }
+}
+
 productList.addEventListener("click", addItem);
 cartDisplay.addEventListener("click", selectQuantity);
 cartDisplay.addEventListener("click", clearAll);
 cartDisplay.addEventListener("click", deleteItem);
 sendBtn.addEventListener("click", sendOrder);
+productSelect.addEventListener("click", selectCategory);
 
 init();
