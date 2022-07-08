@@ -905,3 +905,33 @@ body {
   display: none;
 }
 /*# sourceMappingURL=all.css.map */
+
+.text-center {
+  text-align: center;
+}
+
+.loading {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+  width: 300px;
+  height: 200px;
+  background-color: #fff;
+  border-radius: 20px;
+}
+
+.none {
+  display: none;
+}

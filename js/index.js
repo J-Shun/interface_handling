@@ -7,6 +7,7 @@ const clearAllBtn = document.querySelector(".discardAllBtn");
 const sendBtn = document.querySelector(".orderInfo-btn");
 
 // display
+const loading = document.querySelector(".loading");
 const productDisplay = document.querySelector(".productWrap");
 const cartDisplay = document.querySelector(".shoppingCart-table tbody");
 
@@ -71,6 +72,7 @@ function renderCart() {
 
   if (cart.carts.length < 1) {
     cartDisplay.innerHTML = "<p>目前購物車無商品</p>";
+    loading.classList.add("none");
     return;
   }
 
@@ -85,7 +87,7 @@ function renderCart() {
 
   cartList.forEach((item) => {
     allContent += `
-    <tr>
+    <tr data-id=${item.id}>
       <td>
         <div class="cardItem-title">
           <img src=${item.product.images} alt="" />
@@ -93,10 +95,23 @@ function renderCart() {
         </div>
       </td>
       <td>${currencyFormatter.format(item.product.price)}</td>
-      <td>${item.quantity}</td>
+      <td>
+        <select class="select" value="">
+          <option selected disabled>${item.quantity}</option>
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+          <option>4</option>
+          <option>5</option>
+          <option>6</option>
+          <option>7</option>
+          <option>8</option>
+          <option>9</option>
+        </select>
+      </td>
       <td>${currencyFormatter.format(item.product.price * item.quantity)}</td>
       <td class="discardBtn">
-        <a href="#" class="material-icons" data-id=${item.id}> clear </a>
+        <a href="#" class="material-icons"> clear </a>
       </td>
     </tr>`;
   });
@@ -114,6 +129,7 @@ function renderCart() {
     <td>${currencyFormatter.format(cart.finalTotal)}</td>
   </tr>`;
   cartDisplay.innerHTML = allContent;
+  loading.classList.add("none");
 }
 
 function addItem(e) {
@@ -132,6 +148,13 @@ function addItem(e) {
     obj.data.quantity = 1;
   }
 
+  if (obj.data.quantity > 9) {
+    alert("非常抱歉，已達購買數量上限，若須大量採購煩請來電");
+    return;
+  }
+
+  loading.classList.remove("none");
+
   axios
     .post(url + "carts", obj)
     .then((res) => {
@@ -139,6 +162,26 @@ function addItem(e) {
       renderCart();
     })
     .catch((err) => {
+      loading.classList.add("none");
+      console.log(err);
+    });
+}
+
+function selectQuantity(e) {
+  if (!e.target.classList.contains("select")) return;
+  const obj = { data: {} };
+  obj.data.id = e.target.parentNode.parentNode.getAttribute("data-id");
+  obj.data.quantity = parseInt(e.target.value);
+
+  loading.classList.remove("none");
+  axios
+    .patch(url + "carts/", obj)
+    .then((res) => {
+      cart = res.data;
+      renderCart();
+    })
+    .catch((err) => {
+      loading.classList.add("none");
       console.log(err);
     });
 }
@@ -148,6 +191,7 @@ function clearAll(e) {
   e.preventDefault();
 
   if (cart.carts.length === 0) return;
+  loading.classList.remove("none");
   axios
     .delete(url + "carts")
     .then((res) => {
@@ -155,6 +199,7 @@ function clearAll(e) {
       renderCart();
     })
     .catch((err) => {
+      loading.classList.add("none");
       console.log(err);
     });
 }
@@ -163,8 +208,9 @@ function deleteItem(e) {
   if (!e.target.classList.contains("material-icons")) return;
   e.preventDefault();
 
-  const cartId = e.target.getAttribute("data-id");
+  const cartId = e.target.parentNode.parentNode.getAttribute("data-id");
 
+  loading.classList.remove("none");
   axios
     .delete(url + "carts/" + cartId)
     .then((res) => {
@@ -172,6 +218,7 @@ function deleteItem(e) {
       renderCart();
     })
     .catch((err) => {
+      loading.classList.add("none");
       console.log(err);
     });
 }
@@ -200,19 +247,24 @@ function sendOrder(e) {
     obj.data.user.email = mail;
     obj.data.user.address = address;
     obj.data.user.payment = payment;
+
+    loading.classList.remove("none");
     axios
       .post(url + "orders", obj)
       .then((res) => {
+        loading.classList.add("none");
         alert("下訂成功");
         location.reload();
       })
       .catch((err) => {
+        loading.classList.add("none");
         alert(err.response.data.message);
       });
   }
 }
 
 productList.addEventListener("click", addItem);
+cartDisplay.addEventListener("click", selectQuantity);
 cartDisplay.addEventListener("click", clearAll);
 cartDisplay.addEventListener("click", deleteItem);
 sendBtn.addEventListener("click", sendOrder);
